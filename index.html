@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ff5c9a">
+<meta name="description" content="Donut Crush — Fresh donuts, sweet moments.">
+<title>Donut Crush | دونات تفرّحك</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Fredoka:wght@400;500;600;700&display=swap');
+:root{
+  --pink:#ff5c9a;--pink2:#ff8fbb;--soft:#fff1f7;--brown:#4a2119;
+  --brown2:#6a3428;--cream:#fffaf6;--white:#fff;--text:#2b1915;
+  --muted:#806b65;--line:#f0ded8;--shadow:0 18px 50px rgba(74,33,25,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Cairo,Arial,sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
+a{text-decoration:none;color:inherit}
+.container{width:min(1180px,92%);margin:auto}
+.topbar{background:var(--brown);color:#fff;text-align:center;padding:8px 12px;font-size:13px}
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,250,246,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(240,222,216,.8)}
+.nav-inner{height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:10px;font-family:Fredoka,sans-serif;font-weight:700;font-size:25px;color:var(--brown)}
+.brand img{width:55px;height:55px;object-fit:contain}
+.nav-links{display:flex;gap:28px;align-items:center;font-weight:700;font-size:14px}
+.nav-links a{position:relative}
+.nav-links a:after{content:"";position:absolute;left:0;bottom:-7px;width:0;height:2px;background:var(--pink);transition:.25s}
+.nav-links a:hover:after{width:100%}
+.nav-actions{display:flex;align-items:center;gap:9px}
+.icon-btn{width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;position:relative;transition:.25s}
+.icon-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(74,33,25,.1)}
+.cart-count{position:absolute;right:-2px;top:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:var(--pink);color:#fff;font-size:11px;display:grid;place-items:center;font-weight:800}
+.menu-btn{display:none}
+.hero{padding:72px 0 62px;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;width:430px;height:430px;background:#ffd7e7;border-radius:50%;right:-160px;top:-180px;filter:blur(1px)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--soft);color:var(--pink);padding:8px 14px;border-radius:99px;font-size:13px;font-weight:800;margin-bottom:18px}
+.hero h1{font-family:Fredoka,sans-serif;font-size:clamp(48px,6vw,78px);line-height:.98;color:var(--brown);letter-spacing:-1px}
+.hero h1 span{color:var(--pink)}
+.hero p{color:var(--muted);font-size:17px;line-height:1.9;margin:22px 0 28px;max-width:540px}
+.hero-buttons{display:flex;gap:12px;flex-wrap:wrap}
+.btn{padding:13px 22px;border-radius:14px;font-weight:800;transition:.25s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--pink);color:#fff;box-shadow:0 12px 24px rgba(255,92,154,.25)}
+.btn-primary:hover{transform:translateY(-3px);background:#f4498c}
+.btn-secondary{background:#fff;color:var(--brown);border:1px solid var(--line)}
+.btn-secondary:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.hero-photo{position:relative}
+.hero-photo img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:35px;box-shadow:var(--shadow);display:block}
+.float-card{position:absolute;left:-22px;bottom:24px;background:#fff;padding:13px 16px;border-radius:18px;box-shadow:var(--shadow);font-size:13px;font-weight:800;display:flex;align-items:center;gap:10px}
+.float-card b{color:var(--pink)}
+.section{padding:72px 0}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:30px}
+.section-kicker{color:var(--pink);font-weight:800;font-size:13px}
+.section-title{font-family:Fredoka,sans-serif;font-size:40px;color:var(--brown);margin-top:4px}
+.section-sub{color:var(--muted);font-size:14px;margin-top:6px}
+.categories{display:flex;gap:10px;overflow:auto;padding-bottom:7px}
+.cat{white-space:nowrap;padding:10px 17px;border-radius:99px;background:#fff;border:1px solid var(--line);font-weight:700;color:var(--brown2);transition:.2s}
+.cat.active,.cat:hover{background:var(--pink);border-color:var(--pink);color:#fff}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;transition:.28s;box-shadow:0 5px 20px rgba(74,33,25,.04)}
+.card:hover{transform:translateY(-7px);box-shadow:var(--shadow)}
+.card-img{height:235px;position:relative;overflow:hidden;background:#f9e9e3}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:.5s}
+.card:hover .card-img img{transform:scale(1.05)}
+.badge{position:absolute;top:12px;left:12px;background:#fff;color:var(--pink);font-size:11px;font-weight:800;padding:6px 10px;border-radius:99px;box-shadow:0 5px 15px rgba(0,0,0,.08)}
+.fav{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:17px}
+.card-body{padding:16px}
+.card-title{font-weight:800;font-size:17px;color:var(--brown)}
+.card-desc{font-size:12px;color:var(--muted);margin:5px 0 13px;min-height:38px}
+.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.price{font-family:Fredoka,sans-serif;font-size:21px;color:var(--brown)}
+.add{background:var(--brown);color:#fff;border-radius:11px;padding:9px 13px;font-size:12px;font-weight:800;transition:.2s}
+.add:hover{background:var(--pink)}
+.feature{background:var(--soft);border-radius:32px;padding:45px}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:35px;align-items:center}
+.feature img{width:100%;height:410px;object-fit:cover;border-radius:25px}
+.feature h2{font-family:Fredoka,sans-serif;color:var(--brown);font-size:42px;line-height:1.05;margin:10px 0 15px}
+.feature p{color:var(--muted);line-height:1.9;margin-bottom:20px}
+.points{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.point{background:#fff;border:1px solid #f6dce8;padding:13px;border-radius:15px;font-size:13px;font-weight:700}
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.review{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+.stars{color:#ffad3d;letter-spacing:2px;margin-bottom:12px}
+.review p{font-size:14px;line-height:1.8;color:var(--muted)}
+.review strong{display:block;margin-top:15px;color:var(--brown)}
+.cta{background:var(--brown);color:#fff;border-radius:30px;padding:48px;text-align:center;position:relative;overflow:hidden}
+.cta:after{content:"🍩";position:absolute;font-size:160px;right:-20px;bottom:-70px;opacity:.08}
+.cta h2{font-family:Fredoka,sans-serif;font-size:44px}
+.cta p{color:#efdeda;margin:8px auto 22px;max-width:600px}
+footer{background:#2d1510;color:#fff;padding:45px 0 22px;margin-top:72px}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}
+.footer-brand{font-family:Fredoka,sans-serif;font-size:25px;display:flex;align-items:center;gap:8px}
+.footer-brand img{width:50px;height:50px;object-fit:contain}
+footer p,footer a{color:#cdbab5;font-size:13px;line-height:2}
+footer h4{margin-bottom:12px}
+.footer-bottom{border-top:1px solid #50312a;margin-top:28px;padding-top:17px;display:flex;justify-content:space-between;color:#a9938e;font-size:12px}
+.drawer{position:fixed;inset:0;background:rgba(43,25,21,.45);z-index:100;opacity:0;pointer-events:none;transition:.25s}
+.drawer.open{opacity:1;pointer-events:auto}
+.cart-panel{position:absolute;right:0;top:0;height:100%;width:min(430px,100%);background:var(--cream);transform:translateX(100%);transition:.3s;display:flex;flex-direction:column}
+.drawer.open .cart-panel{transform:translateX(0)}
+.cart-head{padding:20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.cart-head h3{font-family:Fredoka,sans-serif;color:var(--brown);font-size:25px}
+.close{background:#fff;border:1px solid var(--line);width:38px;height:38px;border-radius:50%}
+.cart-items{flex:1;overflow:auto;padding:16px}
+.empty{text-align:center;color:var(--muted);padding:70px 20px}
+.empty .donut{font-size:55px;margin-bottom:12px}
+.cart-item{display:grid;grid-template-columns:70px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:15px;padding:10px;margin-bottom:10px}
+.cart-item img{width:70px;height:70px;object-fit:cover;border-radius:11px}
+.cart-item h4{font-size:14px;color:var(--brown)}
+.cart-item small{color:var(--muted)}
+.qty{display:flex;align-items:center;gap:7px;margin-top:6px}
+.qty button{width:24px;height:24px;border-radius:7px;background:var(--soft);color:var(--brown);font-weight:800}
+.remove{background:none;color:#c5aaa3;font-size:12px;margin-top:5px}
+.cart-foot{padding:17px;border-top:1px solid var(--line);background:#fff}
+.total-row{display:flex;justify-content:space-between;font-weight:800;font-size:18px;color:var(--brown);margin-bottom:13px}
+.search-modal{position:fixed;inset:0;background:rgba(43,25,21,.45);z-index:90;display:none;padding:90px 20px}
+.search-modal.show{display:block}
+.search-box{width:min(700px,100%);margin:auto;background:var(--cream);border-radius:25px;padding:18px}
+.search-box input{width:100%;border:1px solid var(--line);background:#fff;border-radius:14px;padding:15px 17px;outline:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:var(--brown);color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.3s;z-index:200}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s}
+.reveal.visible{opacity:1;transform:none}
+@media(max-width:980px){
+ .products{grid-template-columns:repeat(2,1fr)}
+ .hero-grid,.feature-grid{grid-template-columns:1fr}
+ .hero{padding-top:45px}
+ .hero-photo{max-width:650px;margin:auto}
+ .reviews{grid-template-columns:1fr}
+ .footer-grid{grid-template-columns:1fr 1fr}
+ .nav-links{display:none}
+ .menu-btn{display:grid}
+}
+@media(max-width:600px){
+ .nav-inner{height:68px}
+ .brand{font-size:21px}
+ .brand img{width:46px;height:46px}
+ .hero h1{font-size:53px}
+ .hero p{font-size:15px}
+ .hero-photo img{border-radius:24px}
+ .float-card{left:12px;bottom:12px}
+ .section{padding:52px 0}
+ .section-title{font-size:33px}
+ .products{grid-template-columns:1fr 1fr;gap:11px}
+ .card-img{height:170px}
+ .card-body{padding:12px}
+ .card-title{font-size:14px}
+ .card-desc{font-size:11px}
+ .price{font-size:18px}
+ .add{padding:8px 9px}
+ .feature{padding:22px;border-radius:23px}
+ .feature img{height:270px}
+ .feature h2{font-size:34px}
+ .points{grid-template-columns:1fr}
+ .cta{padding:35px 20px}
+ .cta h2{font-size:35px}
+ .footer-grid{grid-template-columns:1fr}
+ .footer-bottom{flex-direction:column;gap:7px}
+}
+
+.love-message{
+  position:relative;
+  z-index:3;
+  margin:26px auto 0;
+  width:max-content;
+  max-width:90%;
+  padding:10px 18px;
+  border-radius:999px;
+  background:rgba(255,255,255,.92);
+  color:var(--pink);
+  font-weight:800;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(80,40,20,.08);
+}
+</style>
+</head>
+<body>
+<div class="topbar">🍩 دونات طازة • لحظات أحلى • أونلاين 24 ساعة</div>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="#"><img src="assets/logo.png" alt="لوجو Donut Crush"><span>Donut Crush</span></a>
+    <nav class="nav-links">
+      <a href="#home">الرئيسية</a><a href="#shop">الدونات</a><a href="#about">عننا</a><a href="#reviews">آراء الناس</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="بحث">⌕</button>
+      <button class="icon-btn" id="cartBtn" aria-label="السلة">🛒<span class="cart-count" id="cartCount">0</span></button>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="القائمة">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="home">
+<section class="hero">
+ <div class="container hero-grid">
+  <div class="reveal">
+    <h1>💕 اختار دوناتك.. <br><span>وسيب الباقي علينا</span></h1>
+    <p>أهلاً بيك في Donut Crush — مكانك أونلاين لو نفسك في دونات طازة، شوكولاتة غرقانة، وتشكيلة حلوة تتشاركها مع اللي بتحبهم.</p>
+    <div class="hero-buttons"><a class="btn btn-primary" href="#shop">شوف الدونات 🍩</a><a class="btn btn-secondary" href="#about">حكايتنا</a></div>
+  </div>
+  <div class="hero-photo reveal">
+    <img src="assets/donuts-1.jpg" alt="Donut Crush assorted donuts">
+    <div class="float-card">✨ <span>طعم طازة، و<b>مزاج أحلى</b></span></div>
+  </div>
+ </div>
+ <div class="love-message">💗 معمول بحب عشان يظبط مزاجك</div>
+</section>
+
+<section class="section" id="shop">
+ <div class="container">
+  <div class="section-head reveal">
+   <div><div class="section-kicker">المنيو بتاعتنا</div><h2 class="section-title">دلّع نفسك بدونات 🍩</h2></div>
+  </div>
+  <div class="categories reveal" id="categories">
+    <button class="cat active" data-cat="all">الكل</button>
+    <button class="cat" data-cat="chocolate">شوكولاتة</button>
+    <button class="cat" data-cat="oreo">أوريو</button>
+    <button class="cat" data-cat="lotus">لوتس</button>
+    <button class="cat" data-cat="special">مخصوص</button>
+    <button class="cat" data-cat="boxes">بوكسات</button>
+  </div>
+  <div class="products reveal" id="products" style="margin-top:20px"></div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="container">
+  <div class="feature reveal" id="about">
+   <div class="feature-grid">
+    <img src="assets/donuts-3.jpg" alt="Donut Crush donuts">
+    <div>
+      <div class="section-kicker">ليه Donut Crush؟</div>
+      <h2>الحاجات الحلوة بتبدأ بدونات. 💗</h2>
+      <p>خلّيناها بسيطة: دونات تحفة، براند كيوت، طلب أونلاين سهل، والدفع عند الاستلام.</p>
+      <div class="points">
+        <div class="point">🍩 تشكيلة دونات طازة</div>
+        <div class="point">🎀 توبينج وألوان تجنن</div>
+        <div class="point">📦 بوكسات على مزاجك</div>
+        <div class="point">💵 الدفع عند الاستلام</div>
+      </div>
+      <a href="#shop" class="btn btn-primary">شوف المنيو</a>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="reviews">
+ <div class="container">
+  <div class="section-head reveal"><div><div class="section-kicker">كلام بيفرحنا</div><h2 class="section-title">كلام حلو منكم 💕</h2></div></div>
+  <div class="reviews">
+   <article class="review reveal"><div class="stars">★★★★★</div><p>“توبينج الشوكولاتة كان تحفة وده بالظبط اللي كنت نفسي فيه.”</p><strong>— عميل مبسوط</strong></article>
+   <article class="review reveal"><div class="stars">★★★★★</div><p>“البوكس شكله كيوت جدًا والدونات طعمها أحلى.”</p><strong>— عميل مبسوط</strong></article>
+   <article class="review reveal"><div class="stars">★★★★★</div><p>“الطلب سهل والتشكيلة عندهم تحفة.”</p><strong>— عميل مبسوط</strong></article>
+  </div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="container">
+  <div class="cta reveal">
+   <h2>جاهز تدلع نفسك؟ 🍩</h2>
+   <p>اختار اللي نفسك فيه، ضيفه للسلة، وكمل طلبك والدفع عند الاستلام.</p>
+   <a href="#shop" class="btn btn-primary">اطلب دلوقتي</a>
+  </div>
+ </div>
+</section>
+</main>
+
+<footer>
+ <div class="container">
+  <div class="footer-grid">
+   <div><div class="footer-brand"><img src="assets/logo.png" alt="">Donut Crush</div><p style="margin-top:12px">Fresh donuts • Sweet moments<br>أونلاين 24 ساعة</p></div>
+   <div><h4>روابط سريعة</h4><p><a href="#home">Home</a><br><a href="#shop">Shop</a><br><a href="#about">About</a></p></div>
+   <div><h4>السوشيال</h4><p><a href="https://www.instagram.com/guss292026_/" target="_blank" rel="noopener">إنستجرام ↗</a><br><span>واتساب: قريب إن شاء الله</span></p></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Donut Crush. كل الحقوق محفوظة.</span><span>متعمل بواسطة <a href="https://sizma-eg.github.io/us" target="_blank" rel="noopener" style="color:#ff8fbb;font-weight:800">SIZMA</a></span></div>
+ </div>
+</footer>
+
+<div class="drawer" id="drawer">
+ <aside class="cart-panel">
+  <div class="cart-head"><h3>سلتك 🍩</h3><button class="close" id="closeCart">✕</button></div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot">
+   <div class="total-row"><span>الإجمالي</span><span id="cartالإجمالي">0 EGP</span></div>
+   <button class="btn btn-primary" style="width:100%" id="checkoutBtn">كمّل الطلب →</button>
+  </div>
+ </aside>
+</div>
+
+<div class="search-modal" id="searchModal">
+ <div class="search-box">
+  <div style="display:flex;gap:10px;align-items:center"><input id="searchInput" placeholder="دور على الدونات اللي نفسك فيها..." autocomplete="off"><button class="close" id="closeبحث">✕</button></div>
+  <div id="searchResults" style="margin-top:12px"></div>
+ </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const products = [
+ {id:1,name:"Chocolate Crush",cat:"chocolate",price:55,img:"assets/donuts-2.jpg",desc:"تغطية شوكولاتة غنية مع قطع شوكولاتة."},
+ {id:2,name:"Oreo Crush",cat:"oreo",price:60,img:"assets/donuts-3.jpg",desc:"تغطية كريمية مع قطع أوريو مقرمشة."},
+ {id:3,name:"Lotus Crush",cat:"lotus",price:60,img:"assets/donuts-2.jpg",desc:"تغطية لوتس مع قرمشة البسكويت."},
+ {id:4,name:"Pink Sprinkle",cat:"special",price:55,img:"assets/donuts-4.jpg",desc:"تغطية بينك حلوة مع رشات ملونة."},
+ {id:5,name:"White Choco Drizzle",cat:"special",price:55,img:"assets/donuts-4.jpg",desc:"تغطية بيضا ناعمة مع خطوط شوكولاتة."},
+ {id:6,name:"Triple Crush Box",cat:"boxes",price:165,img:"assets/donuts-2.jpg",desc:"بوكس ميكس فيه 3 من المفضلات."},
+ {id:7,name:"Dark Cookie",cat:"oreo",price:60,img:"assets/donuts-3.jpg",desc:"شوكولاتة غنية مع قرمشة الكوكيز."},
+ {id:8,name:"Crush Mix Box",cat:"boxes",price:300,img:"assets/donuts-1.jpg",desc:"بوكس ميكس ملون مناسب للمشاركة."}
+];
+let cart = JSON.parse(localStorage.getItem("donutCrushCart") || "[]");
+let activeCat = "all";
+
+const $ = s => document.querySelector(s);
+function money(n){return `${n.toLocaleString("en-EG")} EGP`}
+function save(){localStorage.setItem("donutCrushCart",JSON.stringify(cart));renderCart();updateCount()}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove("show"),2200)}
+function renderProducts(list=products){
+ const box=$("#products");
+ if(!list.length){box.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">ملقيناش الدونات دي 🍩</div>';return}
+ box.innerHTML=list.map(p=>`<article class="card">
+  <div class="card-img"><img src="${p.img}" alt="${p.name}"><button class="fav" onclick="toast('المفضلة هتتربط بحسابك بعدين ❤️')">♡</button></div>
+  <div class="card-body"><div class="card-title">${p.name}</div><div class="card-desc">${p.desc}</div>
+  <div class="card-bottom"><span class="price">${money(p.price)}</span><button class="add" onclick="addToCart(${p.id})">+ ضيف</button></div></div>
+ </article>`).join("");
+}
+function addToCart(id){const p=products.find(x=>x.id===id);const item=cart.find(x=>x.id===id);item?item.qty++:cart.push({id,qty:1});save();toast(`${p.name} اتضافت للسلة 🍩`)}
+function updateCount(){$("#cartCount").textContent=cart.reduce((a,x)=>a+x.qty,0)}
+function renderCart(){
+ const box=$("#cartItems");
+ if(!cart.length){box.innerHTML='<div class="empty"><div class="donut">🍩</div><b>السلة فاضية</b><p style="margin-top:7px">اختارلك دونات وخلي يومك أحلى.</p></div>';$("#cartالإجمالي").textContent="0 EGP";return}
+ let total=0;
+ box.innerHTML=cart.map(item=>{const p=products.find(x=>x.id===item.id);const sub=p.price*item.qty;total+=sub;return `<div class="cart-item">
+ <img src="${p.img}" alt="${p.name}"><div><h4>${p.name}</h4><small>${money(p.price)}</small><div class="qty"><button onclick="changeQty(${p.id},-1)">−</button><b>${item.qty}</b><button onclick="changeQty(${p.id},1)">+</button></div><button class="remove" onclick="removeItem(${p.id})">شيلها</button></div><b>${money(sub)}</b></div>`}).join("");
+ $("#cartالإجمالي").textContent=money(total)
+}
+function changeQty(id,delta){const x=cart.find(i=>i.id===id);if(!x)return;x.qty+=delta;if(x.qty<=0)cart=cart.filter(i=>i.id!==id);save()}
+function removeItem(id){cart=cart.filter(i=>i.id!==id);save();toast("شيلهاd from cart")}
+function filter(cat){activeCat=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat));renderProducts(cat==="all"?products:products.filter(p=>p.cat===cat))}
+$("#categories").addEventListener("click",e=>{const b=e.target.closest(".cat");if(b)filter(b.dataset.cat)})
+$("#cartBtn").onclick=()=>$("#drawer").classList.add("open");
+$("#closeCart").onclick=()=>$("#drawer").classList.remove("open");
+$("#drawer").onclick=e=>{if(e.target.id==="drawer")$("#drawer").classList.remove("open")}
+$("#searchBtn").onclick=()=>{$("#searchModal").classList.add("show");$("#searchInput").focus()}
+$("#closeبحث").onclick=()=>$("#searchModal").classList.remove("show");
+$("#searchModal").onclick=e=>{if(e.target.id==="searchModal")$("#searchModal").classList.remove("show")}
+$("#searchInput").oninput=e=>{const q=e.target.value.toLowerCase().trim();const r=products.filter(p=>(p.name+" "+p.desc).toLowerCase().includes(q));$("#searchResults").innerHTML=q?r.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid var(--line)"><img src="${p.img}" style="width:55px;height:55px;object-fit:cover;border-radius:10px"><div style="flex:1"><b>${p.name}</b><div style="font-size:12px;color:var(--muted)">${money(p.price)}</div></div><button class="add" onclick="addToCart(${p.id});$('#searchModal').classList.remove('show')">ضيف</button></div>`).join(""):""}
+$("#checkoutBtn").onclick=()=>toast(cart.length?"صفحة تأكيد الطلب هتتربط بالسيستم الحقيقي في الخطوة الجاية.":"السلة فاضية");
+$("#menuBtn").onclick=()=>toast("Mobile menu will be expanded with the backend pages");
+renderProducts();renderCart();updateCount();
+
+const observer=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")}),{threshold:.08});
+document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
