@@ -345,50 +345,85 @@ footer h4{margin-bottom:12px}
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const products = [
- {id:1,name:"Chocolate Crush",cat:"chocolate",price:55,img:"donuts-2.jpg",desc:"تغطية شوكولاتة غنية مع قطع شوكولاتة."},
- {id:2,name:"Oreo Crush",cat:"oreo",price:60,img:"donuts-3.jpg",desc:"تغطية كريمية مع قطع أوريو مقرمشة."},
- {id:3,name:"Lotus Crush",cat:"lotus",price:60,img:"donuts-2.jpg",desc:"تغطية لوتس مع قرمشة البسكويت."},
- {id:4,name:"Pink Sprinkle",cat:"special",price:55,img:"donuts-4.jpg",desc:"تغطية بينك حلوة مع رشات ملونة."},
- {id:5,name:"White Choco Drizzle",cat:"special",price:55,img:"donuts-4.jpg",desc:"تغطية بيضا ناعمة مع خطوط شوكولاتة."},
- {id:6,name:"Triple Crush Box",cat:"boxes",price:165,img:"donuts-2.jpg",desc:"بوكس ميكس فيه 3 من المفضلات."},
- {id:7,name:"Dark Cookie",cat:"oreo",price:60,img:"donuts-3.jpg",desc:"شوكولاتة غنية مع قرمشة الكوكيز."},
- {id:8,name:"Crush Mix Box",cat:"boxes",price:300,img:"donuts-1.jpg",desc:"بوكس ميكس ملون مناسب للمشاركة."}
-];
-let cart = JSON.parse(localStorage.getItem("donutCrushCart") || "[]");
-let activeCat = "all";
+const SUPABASE_URL="https://euvcfvsejcsoympamjub.supabase.co";
+const SUPABASE_KEY="sb_publishable_hct8gjRVMCj2L59vI46Yag_VuXReOdU";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const $ = s => document.querySelector(s);
-function money(n){return `${n.toLocaleString("en-EG")} EGP`}
+let products=[];
+let cart=JSON.parse(localStorage.getItem("donutCrushCart")||"[]");
+let activeCat="all";
+
+const $=s=>document.querySelector(s);
+function money(n){return `${Number(n).toLocaleString("en-EG")} EGP`}
 function save(){localStorage.setItem("donutCrushCart",JSON.stringify(cart));renderCart();updateCount()}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove("show"),2200)}
+
+async function loadProducts(){
+  const {data,error}=await db.from("Products").select("*").order("created_at",{ascending:true});
+  if(error){
+    console.error("Supabase Products error:",error);
+    toast("حصل خطأ في تحميل المنتجات");
+    products=[];
+  }else{
+    products=(data||[]).filter(p=>p.available!==false).map(p=>({
+      id:p.id,
+      name:p.name||"",
+      cat:p.cat||"special",
+      price:Number(p.price)||0,
+      img:p.image||p.img||"",
+      desc:p.description||p.desc||""
+    }));
+  }
+  renderProducts();
+  renderCart();
+  updateCount();
+}
+
 function renderProducts(list=products){
  const box=$("#products");
  if(!list.length){box.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">ملقيناش الدونات دي 🍩</div>';return}
  box.innerHTML=list.map(p=>`<article class="card">
   <div class="card-img"><img src="${p.img}" alt="${p.name}"><button class="fav" onclick="toast('المفضلة هتتربط بحسابك بعدين ❤️')">♡</button></div>
   <div class="card-body"><div class="card-title">${p.name}</div><div class="card-desc">${p.desc}</div>
-  <div class="card-bottom"><span class="price">${money(p.price)}</span><button class="add" onclick="addToCart(${p.id})">+ ضيف</button></div></div>
+  <div class="card-bottom"><span class="price">${money(p.price)}</span><button class="add" onclick="addToCart('${p.id}')">+ ضيف</button></div></div>
  </article>`).join("");
 }
-function addToCart(id){const p=products.find(x=>x.id===id);const item=cart.find(x=>x.id===id);item?item.qty++:cart.push({id,qty:1});save();toast(`${p.name} اتضافت للسلة 🍩`)}
+
+function addToCart(id){
+ const p=products.find(x=>String(x.id)===String(id));
+ if(!p)return;
+ const item=cart.find(x=>String(x.id)===String(id));
+ item?item.qty++:cart.push({id,qty:1});
+ save();toast(`${p.name} اتضافت للسلة 🍩`);
+}
 function updateCount(){$("#cartCount").textContent=cart.reduce((a,x)=>a+x.qty,0)}
 function renderCart(){
  const box=$("#cartItems");
  if(!cart.length){box.innerHTML='<div class="empty"><div class="donut">🍩</div><b>السلة فاضية</b><p style="margin-top:7px">اختارلك دونات وخلي يومك أحلى.</p></div>';$("#cartالإجمالي").textContent="0 EGP";return}
  let total=0;
- box.innerHTML=cart.map(item=>{const p=products.find(x=>x.id===item.id);const sub=p.price*item.qty;total+=sub;return `<div class="cart-item">
- <img src="${p.img}" alt="${p.name}"><div><h4>${p.name}</h4><small>${money(p.price)}</small><div class="qty"><button onclick="changeQty(${p.id},-1)">−</button><b>${item.qty}</b><button onclick="changeQty(${p.id},1)">+</button></div><button class="remove" onclick="removeItem(${p.id})">شيلها</button></div><b>${money(sub)}</b></div>`}).join("");
- $("#cartالإجمالي").textContent=money(total)
+ const valid=[];
+ box.innerHTML=cart.map(item=>{
+   const p=products.find(x=>String(x.id)===String(item.id));
+   if(!p)return "";
+   valid.push(item);
+   const sub=p.price*item.qty;total+=sub;
+   return `<div class="cart-item">
+   <img src="${p.img}" alt="${p.name}"><div><h4>${p.name}</h4><small>${money(p.price)}</small><div class="qty"><button onclick="changeQty('${p.id}',-1)">−</button><b>${item.qty}</b><button onclick="changeQty('${p.id}',1)">+</button></div><button class="remove" onclick="removeItem('${p.id}')">شيلها</button></div><b>${money(sub)}</b></div>`
+ }).join("");
+ cart=valid;
+ $("#cartالإجمالي").textContent=money(total);
 }
-function changeQty(id,delta){const x=cart.find(i=>i.id===id);if(!x)return;x.qty+=delta;if(x.qty<=0)cart=cart.filter(i=>i.id!==id);save()}
-function removeItem(id){cart=cart.filter(i=>i.id!==id);save();toast("شيلهاd from cart")}
+function changeQty(id,delta){const x=cart.find(i=>String(i.id)===String(id));if(!x)return;x.qty+=delta;if(x.qty<=0)cart=cart.filter(i=>String(i.id)!==String(id));save()}
+function removeItem(id){cart=cart.filter(i=>String(i.id)!==String(id));save();toast("اتشالت من السلة")}
+
 function renderCheckout(){
  let total=0;
- const rows=cart.map((x,i)=>{const p=products.find(p=>p.id===x.id);const sub=p.price*x.qty;total+=sub;return `<div>${i+1}. ${p.name} × ${x.qty} — ${money(sub)}</div>`}).join("");
+ const rows=cart.map((x,i)=>{const p=products.find(p=>String(p.id)===String(x.id));if(!p)return "";const sub=p.price*x.qty;total+=sub;return `<div>${i+1}. ${p.name} × ${x.qty} — ${money(sub)}</div>`}).join("");
  $("#checkoutSummary").innerHTML=rows+`<div class="sum-total">الإجمالي: ${money(total)}</div>`;
 }
+
 const areasByGovernorate={
  "القاهرة":["مدينة نصر","مصر الجديدة","المعادي","التجمع","حلوان","شبرا","وسط البلد","عين شمس","المرج"],
  "الجيزة":["الدقي","المهندسين","العجوزة","الهرم","فيصل","6 أكتوبر","الشيخ زايد","إمبابة","العمرانية"],
@@ -417,8 +452,9 @@ const areasByGovernorate={
  "شمال سيناء":["العريش","رفح","الشيخ زويد"],
  "جنوب سيناء":["شرم الشيخ","دهب","نويبع","طور سيناء"]
 };
+
 $("#customerGovernorate").onchange=()=>{
- const gov=$("#customerGovernorate").value, area=$("#customerArea");
+ const gov=$("#customerGovernorate").value,area=$("#customerArea");
  area.innerHTML='<option value="">اختار المنطقة</option>'+((areasByGovernorate[gov]||[]).map(x=>`<option>${x}</option>`).join(""));
  area.disabled=!gov;
 };
@@ -426,48 +462,80 @@ $("#customerName").oninput=e=>{e.target.value=e.target.value.replace(/[^ء-يٰ�
 $("#customerPhone").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,11)};
 $("#customerAddress").oninput=e=>{e.target.value=e.target.value.replace(/[^ء-يٰـ0-9\s،.\-\/]/g,"")};
 $("#customerNotes").oninput=e=>{e.target.value=e.target.value.replace(/[^ء-يٰـ0-9\s،.\-\/]/g,"")};
+
 function buildInstagramOrder(){
  let total=0;
- const rows=cart.map((x,i)=>{const p=products.find(p=>p.id===x.id);const sub=p.price*x.qty;total+=sub;return `${i+1}. ${p.name} × ${x.qty} — ${money(sub)}`}).join("\n");
+ const rows=cart.map((x,i)=>{const p=products.find(p=>String(p.id)===String(x.id));const sub=p.price*x.qty;total+=sub;return `${i+1}. ${p.name} × ${x.qty} — ${money(sub)}`}).join("\n");
  return `🍩 طلب جديد — Donut Crush\n\n🛍️ الطلب:\n${rows}\n\n💰 الإجمالي: ${money(total)}\n💵 الدفع: عند الاستلام\n\n👤 بيانات العميل:\nالاسم: ${$("#customerName").value.trim()}\nالموبايل: ${$("#customerPhone").value.trim()}\nالمحافظة: ${$("#customerGovernorate").value.trim()}\nالمنطقة: ${$("#customerArea").value.trim()}\nالعنوان بالتفصيل: ${$("#customerAddress").value.trim()}\nملاحظات: ${$("#customerNotes").value.trim()||"لا يوجد"}\n\n— تم الطلب من موقع Donut Crush`;
 }
+
 $("#closeCheckout").onclick=()=>$("#checkoutModal").classList.remove("show");
 $("#checkoutModal").onclick=e=>{if(e.target.id==="checkoutModal")$("#checkoutModal").classList.remove("show")};
+
 $("#checkoutForm").onsubmit=async e=>{
  e.preventDefault();
- const name=$("#customerName").value.trim();
- const phone=$("#customerPhone").value.trim();
- const gov=$("#customerGovernorate").value.trim();
- const area=$("#customerArea").value.trim();
- const address=$("#customerAddress").value.trim();
- if(!/^[ء-يٰـ\s]+$/.test(name)){toast("الاسم لازم يكون حروف عربي فقط");return;}
- if(!/^01[0-9]{9}$/.test(phone)){toast("رقم الموبايل لازم 11 رقم ويبدأ بـ 01");return;}
- if(!gov){toast("اختار المحافظة");return;}
- if(!area){toast("اختار المنطقة");return;}
- if(!address){toast("اكتب العنوان بالتفصيل");return;}
+ const name=$("#customerName").value.trim(),phone=$("#customerPhone").value.trim(),gov=$("#customerGovernorate").value.trim(),area=$("#customerArea").value.trim(),address=$("#customerAddress").value.trim();
+ if(!/^[ء-يٰـ\s]+$/.test(name)){toast("الاسم لازم يكون حروف عربي فقط");return}
+ if(!/^01[0-9]{9}$/.test(phone)){toast("رقم الموبايل لازم 11 رقم ويبدأ بـ 01");return}
+ if(!gov){toast("اختار المحافظة");return}
+ if(!area){toast("اختار المنطقة");return}
+ if(!address){toast("اكتب العنوان بالتفصيل");return}
+
+ const items=cart.map(x=>{const p=products.find(p=>String(p.id)===String(x.id));return p?{id:p.id,name:p.name,price:p.price,qty:x.qty}:null}).filter(Boolean);
+ const total=items.reduce((s,x)=>s+x.price*x.qty,0);
+
+ const {error}=await db.from("orders").insert([{
+   customer_name:name,
+   phone:phone,
+   address:`${gov} - ${area} - ${address}`,
+   items:items,
+   total:total,
+   status:"pending"
+ }]);
+
+ if(error){
+   console.error("Supabase orders error:",error);
+   toast("حصل خطأ في حفظ الأوردر");
+   return;
+ }
+
  const order=buildInstagramOrder();
- try{await navigator.clipboard.writeText(order)}catch(_){const t=document.createElement("textarea");t.value=order;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}
+ try{await navigator.clipboard.writeText(order)}catch(_){
+   const t=document.createElement("textarea");t.value=order;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();
+ }
  $("#checkoutModal").classList.remove("show");
  localStorage.removeItem("donutCrushCart");cart=[];renderCart();updateCount();
- toast("الأوردر اتنسخ كامل 📋 افتحنا لك إنستجرام");
+ toast("الأوردر اتحفظ واتنسخ 📋");
  setTimeout(()=>window.open("https://www.instagram.com/guss292026_/","_blank","noopener,noreferrer"),500);
 };
-function filter(cat){activeCat=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat));renderProducts(cat==="all"?products:products.filter(p=>p.cat===cat))}
-$("#categories").addEventListener("click",e=>{const b=e.target.closest(".cat");if(b)filter(b.dataset.cat)})
+
+function filter(cat){
+ activeCat=cat;
+ document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat));
+ renderProducts(cat==="all"?products:products.filter(p=>p.cat===cat));
+}
+$("#categories").addEventListener("click",e=>{const b=e.target.closest(".cat");if(b)filter(b.dataset.cat)});
 $("#cartBtn").onclick=()=>$("#drawer").classList.add("open");
 $("#closeCart").onclick=()=>$("#drawer").classList.remove("open");
-$("#drawer").onclick=e=>{if(e.target.id==="drawer")$("#drawer").classList.remove("open")}
-$("#searchBtn").onclick=()=>{$("#searchModal").classList.add("show");$("#searchInput").focus()}
+$("#drawer").onclick=e=>{if(e.target.id==="drawer")$("#drawer").classList.remove("open")};
+$("#searchBtn").onclick=()=>{$("#searchModal").classList.add("show");$("#searchInput").focus()};
 $("#closeبحث").onclick=()=>$("#searchModal").classList.remove("show");
-$("#searchModal").onclick=e=>{if(e.target.id==="searchModal")$("#searchModal").classList.remove("show")}
-$("#searchInput").oninput=e=>{const q=e.target.value.toLowerCase().trim();const r=products.filter(p=>(p.name+" "+p.desc).toLowerCase().includes(q));$("#searchResults").innerHTML=q?r.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid var(--line)"><img src="${p.img}" style="width:55px;height:55px;object-fit:cover;border-radius:10px"><div style="flex:1"><b>${p.name}</b><div style="font-size:12px;color:var(--muted)">${money(p.price)}</div></div><button class="add" onclick="addToCart(${p.id});$('#searchModal').classList.remove('show')">ضيف</button></div>`).join(""):""}
+$("#searchModal").onclick=e=>{if(e.target.id==="searchModal")$("#searchModal").classList.remove("show")};
+$("#searchInput").oninput=e=>{
+ const q=e.target.value.toLowerCase().trim();
+ const r=products.filter(p=>(p.name+" "+p.desc).toLowerCase().includes(q));
+ $("#searchResults").innerHTML=q?r.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid var(--line)"><img src="${p.img}" style="width:55px;height:55px;object-fit:cover;border-radius:10px"><div style="flex:1"><b>${p.name}</b><div style="font-size:12px;color:var(--muted)">${money(p.price)}</div></div><button class="add" onclick="addToCart('${p.id}');$('#searchModal').classList.remove('show')">ضيف</button></div>`).join(""):"";
+};
 $("#checkoutBtn").onclick=()=>{
- if(!cart.length){toast("السلة فاضية");return;}
+ if(!cart.length){toast("السلة فاضية");return}
  renderCheckout();
  $("#checkoutModal").classList.add("show");
 };
 $("#menuBtn").onclick=()=>toast("Mobile menu will be expanded with the backend pages");
-renderProducts();renderCart();updateCount();
+
+renderCart();
+updateCount();
+loadProducts();
 
 const observer=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")}),{threshold:.08});
 document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
